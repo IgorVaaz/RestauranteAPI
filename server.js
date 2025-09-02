@@ -10,6 +10,10 @@ const app = express();
 // JSON é como um bilhete de pedido bem organizado que o Postman vai nos mandar.
 app.use(express.json());
 
+// NOSSO "BANCO DE DADOS" TEMPORÁRIO
+// É UMA LISTA VAZIA QUE VAI GUARDAR OS USUÁRIOS QUE SE CADASTRATEM.
+let bancoDeDados = [];
+
 // Passo 4: Definir o número da "porta" da nossa cozinha.
 // O Postman precisa saber em qual porta bater para fazer pedidos.
 // Vamos usar a porta 3000.
@@ -35,11 +39,33 @@ app.post('/registrar', (req, res) => {
         return res.send('Ei, você esqueceu de mandar o nome ou a senha!');
     }
 
+    // 1. CRIAMOS UM "PACOTE" COM OS DADOS DO NOVO USUÁRIO
+    const novoUsuario = {
+        nome: nome,
+        senha: senha // EM PROJETOS REAIS, NUNCA GUARDAMOS A SENHA ASSIM! MAS HOJE PODE.
+    }
+
+    // 2. ADICIONAMOS O NOVO USUÁRIO
+    bancoDeDados.push(novoUsuario);
+
+    // BONUS: VAMOS MOSTRAR NO TERMINAL COMO ESTÁ NOSSO BANCO DE DADOS AGORA!
+    console.log('Banco de dados atualizado: ', bancoDeDados);
+
     // Se deu tudo certo, mandamos uma resposta de sucesso!
-    res.send(`Olá, ${nome}! Seu registro foi recebido com sucesso. Sua senha secreta é ${senha}, não conte a ninguém!`);
+    res.send(`Olá, ${nome}! Seu registro foi recebido E ANOTADO COM SUCESSO!`);
 
 } );
 // ============================================
+
+//NOVA ROTA GET PARA LISTAR OS USUÁRIOS
+// QUANDO ALGUÉM PEDIR (GET) A LISTA EM /usuarios...
+app.get('/usuario', (req, res) => {
+    console.log("Alguém pediu a lista de usuários!");
+    //NÓS RESPONDEMOS COM O JSON DO BANCO DE DADOS
+    res.json(bancoDeDados);
+});
+
+
 
 // Passo 6: Ligar o fogão! Ou seja, inciar nosso servidor.
 app.listen(PORT, () => {
