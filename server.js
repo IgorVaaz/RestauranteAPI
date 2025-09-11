@@ -65,6 +65,54 @@ app.get('/usuario', (req, res) => {
     res.json(bancoDeDados);
 });
 
+// =============================================
+// NOVA ROTA GET PARA BUSCAR UM USUARIO ESPECIFICO PELO NOME
+// O ":nome" é o PARAMETRO.
+app.get('/listarUsuarioPeloNome/:nome', (req, res) => {
+
+    // 1° Pegamos a "pista" que veio no LINK
+    // O express guarda o parametro dentro de (req.params).
+    const nomeDoUsuarioBuscado = req.params.nome;
+
+    console.log(`Recebi um pedido pra achar o usuario: ${nomeDoUsuarioBuscado}`);
+
+    // 2° Agora, procuramos no nosso "Banco de Dados" por esse usuario
+    // O metodo .find() é perfeito pra isso! Ele para assim que encontra o primeiro nome.
+    const usuarioEncontrado = bancoDeDados.find((usuario) => {
+        return usuario.nome.toLowerCase() === nomeDoUsuarioBuscado.toLowerCase();
+    });
+
+    // 3° Verificamos se o usuario buscado existe
+    if (usuarioEncontrado){
+            // Se existe, manda os dados do usuario como resposta!
+            console.log('Usuario encontrado!', usuarioEncontrado);
+            res.json(usuarioEncontrado);
+    } else {
+        console.log('Usuario não encontrado');
+        res.send(`Desculpe, o usuario ${nomeDoUsuarioBuscado} não foi encontrato.`);
+    }
+});
+
+// NOVA ROTA DELETE PRA EXCLUIR UM USUARIO
+app.delete('/usuarios/:nome', (req, res) => {
+    const { nome } = req.params;
+    console.log(`Pedido para EXCLUIR o usuario: ${nome}`);
+
+    const indiceDoUsuario = bancoDeDados.findIndex(
+        usuario => usuario.nome.toLowerCase() === nome.toLowerCase()
+    );
+
+    if(indiceDoUsuario !== -1){
+        bancoDeDados.splice(indiceDoUsuario, 1);
+        console.log('Usuário removido. Banco de dados atual:', bancoDeDados);
+        res.send(`O usuário ${nome} foi removido com sucesso!`);
+    } else {
+        console.log(`Usuario ${nome} não encontrado para excluir`);
+        res.send(`Usuario ${nome} não encontrado. Ninguém foi removido.`);
+    }
+
+
+});
 
 
 // Passo 6: Ligar o fogão! Ou seja, inciar nosso servidor.
