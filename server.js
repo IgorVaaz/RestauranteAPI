@@ -24,7 +24,7 @@ const PORT = 3000;
 // Quando alguém fizer um pedido do tipo POST para /registrar, esse código vai rodar.
 // POST sinifica que estamos ENVIANDO dados para o servidor.
 app.post('/registrar', (req, res) => {
-    
+
     // Pegamos o nome e a senha que vieram no "corpo" (body) do pedido.
     const nome = req.body.nome;
     const senha = req.body.senha;
@@ -54,12 +54,12 @@ app.post('/registrar', (req, res) => {
     // Se deu tudo certo, mandamos uma resposta de sucesso!
     res.send(`Olá, ${nome}! Seu registro foi recebido E ANOTADO COM SUCESSO!`);
 
-} );
+});
 // ============================================
 
 //NOVA ROTA GET PARA LISTAR OS USUÁRIOS
 // QUANDO ALGUÉM PEDIR (GET) A LISTA EM /usuarios...
-app.get('/usuario', (req, res) => {
+app.get('/usuarios', (req, res) => {
     console.log("Alguém pediu a lista de usuários!");
     //NÓS RESPONDEMOS COM O JSON DO BANCO DE DADOS
     res.json(bancoDeDados);
@@ -83,10 +83,10 @@ app.get('/listarUsuarioPeloNome/:nome', (req, res) => {
     });
 
     // 3° Verificamos se o usuario buscado existe
-    if (usuarioEncontrado){
-            // Se existe, manda os dados do usuario como resposta!
-            console.log('Usuario encontrado!', usuarioEncontrado);
-            res.json(usuarioEncontrado);
+    if (usuarioEncontrado) {
+        // Se existe, manda os dados do usuario como resposta!
+        console.log('Usuario encontrado!', usuarioEncontrado);
+        res.json(usuarioEncontrado);
     } else {
         console.log('Usuario não encontrado');
         res.send(`Desculpe, o usuario ${nomeDoUsuarioBuscado} não foi encontrato.`);
@@ -102,7 +102,7 @@ app.delete('/usuarios/:nome', (req, res) => {
         usuario => usuario.nome.toLowerCase() === nome.toLowerCase()
     );
 
-    if(indiceDoUsuario !== -1){
+    if (indiceDoUsuario !== -1) {
         bancoDeDados.splice(indiceDoUsuario, 1);
         console.log('Usuário removido. Banco de dados atual:', bancoDeDados);
         res.send(`O usuário ${nome} foi removido com sucesso!`);
@@ -110,8 +110,46 @@ app.delete('/usuarios/:nome', (req, res) => {
         console.log(`Usuario ${nome} não encontrado para excluir`);
         res.send(`Usuario ${nome} não encontrado. Ninguém foi removido.`);
     }
+});
 
+// NOVA ROTA PUT PARA ATUALIZAR UM USUARIO PELO NOME
+app.put('/usuarios/:nome', (req, res) => {
+    // 1° Pegar o nome do usuário a ser atualizado
+    const nomeParaAtualizar = req.params.nome;
 
+    // 2° Pegar a NOVA informação do corpo do pedido.
+    // Por exemplo, para atualizar senha
+    const novaSenha = req.body.senha;
+
+    console.log(`Recebi um pedido para ATUALIZAR o usuário: ${nomeParaAtualizar}`);
+
+    // Validar se recebemos uma senha
+    if(!novaSenha){
+        return res.send('Você precisa enviar uma senha no corpo (BODY)');
+    }
+
+    // 3° Pesquisar o usuario no "Banco de Dados"
+    // Usar o .find() para pegar o objeto Usuario inteiro do Banco de Dados.
+    // UsuarioEncontrado é o que temos salvo no banco.
+    const usuarioEncontrado = bancoDeDados.find(
+        (usuario) => usuario.nome.toLowerCase() === nomeParaAtualizar.toLowerCase()
+    );
+
+    //4° Verificar se o usuário existe.
+    if(usuarioEncontrado){
+        //Se encontrou, atualiza a senha!
+        usuarioEncontrado.senha = novaSenha;
+
+        console.log('Senha atualizada com sucesso. Banco agora: ', bancoDeDados);
+        res.json({
+            mensagem: `A senha do usuario ${nomeParaAtualizar} foi atualizada com sucesso!`,
+            usuario: usuarioEncontrado // Enviamos o usuario com os dados novos.
+        });
+    } else {
+        //Se não encontrou, mandamos a mensagem de erro.
+        console.log(`Usuario ${nomeParaAtualizar} não encontrado para atualizar.`);
+        res.send(`Usuario ${nomeParaAtualizar} não encontrato. Ninguém atualizado.`);
+    }
 });
 
 
